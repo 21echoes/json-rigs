@@ -126,76 +126,31 @@ module Clinkle
         port
       end
 
-      def daemonize_block
-        exit if fork
-        Process.setsid
-        exit if fork
-        STDIN.reopen "/dev/null"
-        STDOUT.reopen "/dev/null", "a" 
-        STDERR.reopen "/dev/null", "a" 
-
-        yield
-      end
-
-      def start(fixture_path, daemonize=true)
-        begin
-          pid = File.read(PID_FILE)
-          pid.strip!
-          puts "Killing old fixture server (pid #{pid}).."
-          Process.kill 'INT', pid.to_i
-        rescue Errno::ENOENT, Errno::ESRCH
-          puts "Fixture server didn't exist. That's fine."
-        end
-
+      def start(fixture_path)
         puts 'Starting fixture server...'
 
-        start_server = Proc.new do
-          port = _choose_port()
+        port = _choose_port()
 
-          FileUtils.mkdir_p(File.dirname(PID_FILE))
-          File.open(PID_FILE, 'w') do |io| io.write($$) end
-          File.open(PORT_FILE, 'w') do |io| io.write(port) end
+        File.open(PORT_FILE, 'w') do |io| io.write(port) end
 
-          FixtureServer.set(:port, port)
-          FixtureServer.set(:fixture_path, fixture_path)
+        FixtureServer.set(:port, port)
+        FixtureServer.set(:fixture_path, fixture_path)
+        FixtureServer::load_fixtures
+        Clinkle::Fixtures::load_active_fixtures
+
+        # Start listener on fixture path to reload fixtures if necessary.
+        listener = Listen.to(fixture_path)
+        listener.filter(/\.rb$/)
+        listener.change do
+          puts 'Reloading fixtures...'
+          Clinkle::Fixtures::clear_all!
           FixtureServer::load_fixtures
           Clinkle::Fixtures::load_active_fixtures
-
-          # Start listener on fixture path to reload fixtures if necessary.
-          listener = Listen.to(fixture_path)
-          listener.filter(/\.rb$/)
-          listener.change do
-            puts 'Reloading fixtures...'
-            Clinkle::Fixtures::clear_all!
-            FixtureServer::load_fixtures
-            Clinkle::Fixtures::load_active_fixtures
-            puts 'Fixtures reloaded.'
-          end
-          listener.start(false)
-
-          FixtureServer.run!
+          puts 'Fixtures reloaded.'
         end
+        listener.start(false)
 
-        if daemonize
-          daemonize_block(&start_server)
-        else
-          start_server.call
-        end
-      end
-
-      def stop
-        puts 'Stopping fixture server...'
-        begin
-          file = File.open(PID_FILE)
-          pid = file.read.to_i
-          file.close
-
-          Process.kill('INT', pid)
-          File.delete(PID_FILE, PORT_FILE)
-          puts 'Fixture server stopped.'
-        rescue Errno::ENOENT
-          puts "Fixture server doesn't seem to be started."
-        end
+        FixtureServer.run!
       end
     end
   end

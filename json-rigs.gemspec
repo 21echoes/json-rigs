@@ -9,6 +9,7 @@ Gem::Specification.new do |s|
   s.email       = ['alex@clinkle.com']
   s.homepage    = 'https://github.com/Clinkle/json-rigs'
   s.summary     = '~~ set sail with json-rigs ~~'
+  s.executables = [ 'jrigs' ]
   s.files       = %w(
     lib/json-rigs.rb
     lib/json-rigs/client.rb
@@ -22,5 +23,7 @@ Gem::Specification.new do |s|
   s.description = 'An easy way to serve fixtures in response to web requests.' + 
     'Use a handy panel to choose which fixtures to serve. Great for QA and fast prototyping.'
 
+  s.add_dependency 'daemons'
+  s.add_dependency 'listen'
   s.add_dependency 'sinatra'
 end
