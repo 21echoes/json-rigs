@@ -13,7 +13,6 @@ Gem::Specification.new do |s|
   s.files       = %w(
     lib/json-rigs.rb
     lib/json-rigs/client.rb
-    lib/json-rigs/constants.rb
     lib/json-rigs/fixture.rb
     lib/json-rigs/fixtures.rb
     lib/json-rigs/fixture-templates.rb
@@ -25,6 +24,7 @@ Gem::Specification.new do |s|
     'Use a handy panel to choose which fixtures to serve. Great for QA and fast prototyping.'
 
   s.add_dependency 'daemons'
+  s.add_dependency 'json'
   s.add_dependency 'listen'
   s.add_dependency 'sinatra'
 end

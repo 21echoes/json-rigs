@@ -1,3 +1,5 @@
+require 'json'
+
 require 'json-rigs/fixture'
 
 module JsonRigs

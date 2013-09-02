@@ -1,7 +1,16 @@
 #!/usr/bin/ruby
 
 require 'daemons'
+require 'json-rigs/server'
 
-SERVER_PATH = File.expand_path('../../lib/json-rigs/server.rb', __FILE__)
-Daemons.run(SERVER_PATH)
+OPTIONS = {
+  app_name: 'json-rigs',
+  dir: '/tmp/',
+  dir_mode: :normal
+}
+cwd = File.join(Dir.pwd, 'fixtures')
+
+Daemons.run_proc('json-rigs', OPTIONS) do
+  JsonRigs::FixtureServerRunner.start(cwd)
+end
 

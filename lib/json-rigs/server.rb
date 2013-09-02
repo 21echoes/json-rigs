@@ -1,7 +1,9 @@
 require 'listen'
-require 'socket'
-require 'json-rigs/fixture'
 require 'sinatra/base'
+require 'socket'
+
+require 'json-rigs/fixture'
+require 'json-rigs/fixtures'
 
 module JsonRigs
   class FixtureServer < Sinatra::Base
@@ -10,7 +12,11 @@ module JsonRigs
     end
 
     def self.load_fixtures
-      Dir[File.join(settings.fixture_path, '**/*.rb')].each do |f| load (f) end
+      puts "Loading fixtures from #{settings.fixture_path}..."
+      Dir[File.join(settings.fixture_path, '**/*.rb')].each do |f|
+        puts "Loading #{f}..."
+        load(f)
+      end
     end
 
     helpers do
@@ -118,25 +124,23 @@ module JsonRigs
 
         port = choose_port()
 
-        File.open(PORT_FILE, 'w') do |io| io.write(port) end
-
         FixtureServer.set(:port, port)
         FixtureServer.set(:fixture_path, fixture_path)
         FixtureServer::load_fixtures
         JsonRigs::Fixtures::load_active_fixtures
 
         # Start listener on fixture path to reload fixtures if necessary.
-        listener = Listen.to(fixture_path)
-        listener.filter(/\.rb$/)
-        listener.change(&method(:on_fixture_change))
-        listener.start(false)
+        Listen.to(fixture_path)
+          .filter(/\.rb$/)
+          .change(&method(:on_fixture_change))
+          .start
 
         FixtureServer.run!
       end
 
       private
 
-      def on_fixture_change
+      def on_fixture_change(modified, added, removed)
         puts 'Reloading fixtures...'
 
         JsonRigs::Fixtures::clear_all!
