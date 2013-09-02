@@ -1,4 +1,4 @@
-module Clinkle
+module JsonRigs
   module FixtureTemplates
     def basic_post_fixture
       fixture :success do

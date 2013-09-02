@@ -1,7 +1,7 @@
 require 'net/http'
 require 'spec/fixture_server/constants'
 
-module Clinkle
+module JsonRigs
   module FixtureClient
     class << self
       FIXTURE_URI = '/fixtures'
@@ -47,9 +47,9 @@ module Clinkle
 
       def get_conn
         begin
-          Net::HTTP.new('localhost', File.read(Clinkle::PORT_FILE).to_i)
+          Net::HTTP.new('localhost', File.read(JsonRigs::PORT_FILE).to_i)
         rescue Errno::ENOENT
-          fail "Failed to find fixture server port file #{Clinkle::PORT_FILE}. Maybe your fixture server is down."
+          fail "Failed to find fixture server port file #{JsonRigs::PORT_FILE}. Maybe your fixture server is down."
         end
       end
 

@@ -1,6 +1,6 @@
 require 'spec/fixture_server/templates'
 
-module Clinkle
+module JsonRigs
   class Fixture
 
     attr_accessor :pause_time
@@ -15,7 +15,7 @@ module Clinkle
   end
 
   class FixturedAction
-    include Clinkle::FixtureTemplates
+    include JsonRigs::FixtureTemplates
 
     attr_reader :fixtures, :url 
     attr_accessor :active_fixture_name

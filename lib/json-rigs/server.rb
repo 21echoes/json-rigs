@@ -4,7 +4,7 @@ require 'spec/fixture_server/constants'
 require 'spec/fixture_server/fixture'
 require 'sinatra/base'
 
-module Clinkle
+module JsonRigs
   class FixtureServer < Sinatra::Base
     configure :production, :development do
       enable :logging
@@ -19,7 +19,7 @@ module Clinkle
         action_name = params[:action]
         halt 'missing action param' unless action_name
 
-        action = Clinkle::Fixtures::find_action(servlet_url, method, action_name)
+        action = JsonRigs::Fixtures::find_action(servlet_url, method, action_name)
         halt "unknown action '#{servlet_url} #{method} #{action_name}'" unless action
 
         logger.info "Responding to #{servlet_url} #{method} #{action_name}"
@@ -44,13 +44,13 @@ module Clinkle
       end
 
       def clear_fixtures
-        Clinkle::Fixtures::clear_active_fixtures
+        JsonRigs::Fixtures::clear_active_fixtures
         logger.info 'Fixture clear successful.'
         return 200
       end
 
       def get_fixtures
-        Clinkle::Fixtures::fixtures.to_json
+        JsonRigs::Fixtures::fixtures.to_json
       end
 
       def set_active_fixture
@@ -62,7 +62,7 @@ module Clinkle
           end
         end
 
-        action = Clinkle::Fixtures::find_action(params[:url], params[:method], params[:action])
+        action = JsonRigs::Fixtures::find_action(params[:url], params[:method], params[:action])
 
         action_str = "#{params[:url]} #{params[:method]} #{params[:action]}"
         unless action
@@ -71,7 +71,7 @@ module Clinkle
         end
         action.active_fixture_name = params[:fixture]
 
-        Clinkle::Fixtures::save_active_fixtures
+        JsonRigs::Fixtures::save_active_fixtures
 
         logger.info "Setting fixture for #{action_str} to #{params[:fixture]}"
 
@@ -136,16 +136,16 @@ module Clinkle
         FixtureServer.set(:port, port)
         FixtureServer.set(:fixture_path, fixture_path)
         FixtureServer::load_fixtures
-        Clinkle::Fixtures::load_active_fixtures
+        JsonRigs::Fixtures::load_active_fixtures
 
         # Start listener on fixture path to reload fixtures if necessary.
         listener = Listen.to(fixture_path)
         listener.filter(/\.rb$/)
         listener.change do
           puts 'Reloading fixtures...'
-          Clinkle::Fixtures::clear_all!
+          JsonRigs::Fixtures::clear_all!
           FixtureServer::load_fixtures
-          Clinkle::Fixtures::load_active_fixtures
+          JsonRigs::Fixtures::load_active_fixtures
           puts 'Fixtures reloaded.'
         end
         listener.start(false)
