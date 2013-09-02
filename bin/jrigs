@@ -3,6 +3,5 @@
 require 'daemons'
 
 SERVER_PATH = File.expand_path('../../lib/json-rigs/server.rb', __FILE__)
-
 Daemons.run(SERVER_PATH)
 

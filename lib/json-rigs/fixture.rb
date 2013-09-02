@@ -1,4 +1,4 @@
-require 'spec/fixture_server/templates'
+require 'json-rigs/fixture-templates'
 
 module JsonRigs
   class Fixture
@@ -39,14 +39,14 @@ module JsonRigs
     def active_fixture?; !@active_fixture_name.empty? end
 
     def to_hash
-      fixture_hash = @fixtures.keys.reduce({}) { |h, fixture_name|
-        h[fixture_name] = @active_fixture_name == fixture_name
-        h
-      }
+      fixture_hash = @fixtures.keys.each_with_object({}) do |fixture_name, hash|
+        hash[fixture_name] = @active_fixture_name == fixture_name
+      end
+
       {
-        :action_name => @action,
-        :method => @method,
-        :fixtures => fixture_hash
+        action_name: @action,
+        method: @method,
+        fixtures: fixture_hash
       }
     end
   end

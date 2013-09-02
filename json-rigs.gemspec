@@ -15,8 +15,9 @@ Gem::Specification.new do |s|
     lib/json-rigs/client.rb
     lib/json-rigs/constants.rb
     lib/json-rigs/fixture.rb
+    lib/json-rigs/fixtures.rb
+    lib/json-rigs/fixture-templates.rb
     lib/json-rigs/server.rb
-    lib/json-rigs/templates.rb
   )
   s.license     = 'MIT'
 
