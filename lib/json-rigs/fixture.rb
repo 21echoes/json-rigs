@@ -20,11 +20,10 @@ module JsonRigs
     attr_reader :fixtures, :url 
     attr_accessor :active_fixture_name
 
-    def initialize(url, method, action)
+    def initialize(url, method)
       @active_fixture_name = nil
       @url = url
       @method = method
-      @action = action
       @fixtures = {}
     end
 
@@ -44,7 +43,6 @@ module JsonRigs
       end
 
       {
-        action_name: @action,
         method: @method,
         fixtures: fixture_hash
       }

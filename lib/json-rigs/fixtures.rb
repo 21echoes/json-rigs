@@ -4,23 +4,23 @@ require 'json-rigs/fixture'
 
 module JsonRigs
   module Fixtures
-    FixturedActionKey = Struct.new(:url, :method, :action)
+    FixturedActionKey = Struct.new(:url, :method)
     ACTIVE_FIXTURE_FILE = 'tmp/active_fixtures.json'
 
-    def self.fixture_action(url, method, action, &block)
+    def self.fixture_action(url, method, &block)
       method = method.to_s
       @actions ||= {}
 
-      key = _key(url, method, action)
-      fixture_action = @actions[key] || FixturedAction.new(url, method, action)
+      key = _key(url, method)
+      fixture_action = @actions[key] || FixturedAction.new(url, method)
       @actions[key] = fixture_action
       fixture_action.instance_eval &block
     end
 
-    def self.find_action(url, method, action)
+    def self.find_action(url, method)
       method = method.to_s
       @actions ||= {}
-      @actions[_key(url, method, action)]
+      @actions[_key(url, method)]
     end
 
     def self.clear_active_fixtures
@@ -31,7 +31,7 @@ module JsonRigs
 
     def self.save_active_fixtures
       active_fixtures = @actions.map { |key, action|
-        [ key.url, key.method, key.action, action.active_fixture_name ]
+        [ key.url, key.method, action.active_fixture_name ]
       }
       FileUtils.mkdir_p(File.dirname(ACTIVE_FIXTURE_FILE))
       File.open(ACTIVE_FIXTURE_FILE, 'w') { |io| io.write(active_fixtures.to_json) }
@@ -45,8 +45,8 @@ module JsonRigs
       end
 
       active_fixtures.each do |fixture|
-        url, method, action_name, active_fixture = fixture
-        action = find_action(url, method, action_name)
+        url, method, active_fixture = fixture
+        action = find_action(url, method)
         if action
           action.active_fixture_name = active_fixture
         end
@@ -65,8 +65,8 @@ module JsonRigs
       json
     end
 
-    def self._key(url, method, action)
-      FixturedActionKey.new(url, method, action)
+    def self._key(url, method)
+      FixturedActionKey.new(url, method)
     end
   end
 end

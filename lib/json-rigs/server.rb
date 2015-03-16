@@ -21,13 +21,10 @@ module JsonRigs
 
     helpers do
       def serve_request(servlet_url, method)
-        action_name = params[:action]
-        halt 'missing action param' unless action_name
+        action = JsonRigs::Fixtures::find_action(servlet_url, method)
+        halt "unknown action '#{servlet_url} #{method}'" unless action
 
-        action = JsonRigs::Fixtures::find_action(servlet_url, method, action_name)
-        halt "unknown action '#{servlet_url} #{method} #{action_name}'" unless action
-
-        logger.info "Responding to #{servlet_url} #{method} #{action_name}"
+        logger.info "Responding to #{servlet_url} #{method}"
 
         if action.active_fixture?
           logger.info "Using fixture #{action.active_fixture_name.inspect}"
@@ -59,7 +56,7 @@ module JsonRigs
       end
 
       def set_active_fixture
-        %w{url method action fixture}.each do |arg|
+        %w{url method fixture}.each do |arg|
           value = params[arg]
           unless value
             logger.error "missing #{arg} param"
@@ -67,9 +64,9 @@ module JsonRigs
           end
         end
 
-        action = JsonRigs::Fixtures::find_action(params[:url], params[:method], params[:action])
+        action = JsonRigs::Fixtures::find_action(params[:url], params[:method])
 
-        action_str = "#{params[:url]} #{params[:method]} #{params[:action]}"
+        action_str = "#{params[:url]} #{params[:method]}"
         unless action
           logger.error "unknown action #{action_str}"
           halt "unknown action #{action_str}"
