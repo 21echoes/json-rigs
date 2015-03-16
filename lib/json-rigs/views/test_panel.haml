@@ -1,0 +1,101 @@
+!!!
+%html
+  %head
+    %title Fixture Server Test Panel
+
+  :css
+    html {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    h2 { margin-left: 10px; }
+
+    h3 {
+      width: 200px;
+      display: inline-block;
+      margin-left: 10px;
+      font-weight: inherit;
+    }
+
+    .fixtures button {
+      width: 150px;
+      margin: 5px;
+      font-size: 14px;
+      padding: 10px 5px;
+      vertical-align: top;
+    }
+
+    table {
+      border-collapse: collapse;
+    }
+
+    .active {
+      color: rgb(0, 150, 0);
+    }
+
+    .action {
+      border-top: 1px dotted gray;
+      border-bottom: 1px dotted gray;
+      text-align: left;
+    }
+
+    .action:nth-child(even) {
+      background-color: rgb(240, 240, 240);
+    }
+
+  %body
+    %div(style="margin-left: 10px")
+      %h1 Fixture Server Test Panel
+      %button.clear Clear Fixtures
+      %button.all Set All Fixtures
+
+    .fixtures
+      - @fixtures.sort.each do |url, actions|
+        %h2= 'API: ' << url
+        %table
+          - actions.sort_by { |action| action[:method] }.each do |action|
+            %tr.action
+              %td(style="border-right: 1px dotted gray")
+                %h3= action[:method]
+              %td.types
+                - action[:fixtures].each do |fixture, active|
+                  %button(data-url="#{url}"
+                    data-method="#{action[:method]}"
+                    data-fixture="#{fixture}"
+                    class="#{active ? 'active' : ''}")= fixture
+
+    %script(src="https://code.jquery.com/jquery-2.1.3.min.js")
+    
+    :javascript
+      $(function() {
+        $('button[data-url]').click(function() {
+          var $button = $(this);
+          $.post('/test-fixtures', {
+            fixture_action: 'set',
+            url: $button.attr('data-url'),
+            method: $button.attr('data-method'),
+            fixture: $button.attr('data-fixture')
+          }, function() {
+            $button.siblings().removeClass('active');
+            $button.addClass('active');
+          });
+        });
+
+        $('button.all').click(function() {
+          $('.action .types :first-child').not('.active').click();
+        });
+
+        $('button.clear').click(function() {
+          var $button = $(this);
+          $.post('/test-fixtures', {
+            fixture_action: 'clear'
+          }, function() {
+            window.location.reload();
+          });
+        });
+      });

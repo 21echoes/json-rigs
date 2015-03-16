@@ -1,6 +1,7 @@
 require 'listen'
 require 'sinatra/base'
 require 'socket'
+require 'haml'
 
 require 'json-rigs/fixture'
 require 'json-rigs/fixtures'
@@ -79,6 +80,11 @@ module JsonRigs
 
         return 200
       end
+    end
+
+    get '/test-panel' do
+      @fixtures = JsonRigs::Fixtures::fixtures
+      haml :test_panel, locals: {fixtures: @fixtures}
     end
 
     get '/fixtures' do

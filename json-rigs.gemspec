@@ -27,4 +27,5 @@ Gem::Specification.new do |s|
   s.add_dependency 'json', '~> 1.8'
   s.add_dependency 'listen', '~> 2.9'
   s.add_dependency 'sinatra', '~> 1.4'
+  s.add_dependency 'haml', '~> 4.0'
 end
