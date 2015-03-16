@@ -5,9 +5,9 @@ Gem::Specification.new do |s|
   s.name        = 'json-rigs'
   s.version     = '1.0.0'
   s.date        = '2013-09-01'
-  s.authors     = ['Clinkle']
-  s.email       = ['alex@clinkle.com']
-  s.homepage    = 'https://github.com/Clinkle/json-rigs'
+  s.authors     = ['Clinkle','David Kettler']
+  s.email       = ['alex@clinkle.com','21echoes@gmail.com']
+  s.homepage    = 'https://github.com/21echoes/json-rigs'
   s.summary     = '~~ set sail with json-rigs ~~'
   s.executables = [ 'jrigs' ]
   s.files       = %w(
