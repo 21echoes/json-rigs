@@ -130,10 +130,10 @@ module JsonRigs
         JsonRigs::Fixtures::load_active_fixtures
 
         # Start listener on fixture path to reload fixtures if necessary.
-        Listen.to(fixture_path)
-          .filter(/\.rb$/)
-          .change(&method(:on_fixture_change))
-          .start
+        listener = Listen.to(fixture_path, only: /\.rb$/) { |modified, added, removed|
+          on_fixture_change(modified, added, removed)
+        }
+        listener.start
 
         FixtureServer.run!
       end

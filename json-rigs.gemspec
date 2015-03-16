@@ -23,8 +23,8 @@ Gem::Specification.new do |s|
   s.description = 'An easy way to serve fixtures in response to web requests.' + 
     'Use a handy panel to choose which fixtures to serve. Great for QA and fast prototyping.'
 
-  s.add_dependency 'daemons'
-  s.add_dependency 'json'
-  s.add_dependency 'listen'
-  s.add_dependency 'sinatra'
+  s.add_dependency 'daemons', '~> 1.2'
+  s.add_dependency 'json', '~> 1.8'
+  s.add_dependency 'listen', '~> 2.9'
+  s.add_dependency 'sinatra', '~> 1.4'
 end
