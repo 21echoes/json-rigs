@@ -2,6 +2,7 @@ require 'listen'
 require 'sinatra/base'
 require 'socket'
 require 'haml'
+require 'pathname'
 
 require 'json-rigs/fixture'
 require 'json-rigs/fixtures'
@@ -14,9 +15,33 @@ module JsonRigs
 
     def self.load_fixtures
       puts "Loading fixtures from #{settings.fixture_path}..."
-      Dir[File.join(settings.fixture_path, '**/*.rb')].each do |f|
-        puts "Loading #{f}..."
-        load(f)
+      Dir[File.join(settings.fixture_path, '**/*.json')].each do |f|
+        load_fixture(f)
+      end
+    end
+
+    def self.load_fixture(f)
+      puts "Loading #{f}..."
+      relevant_path = f.sub(/\A#{settings.fixture_path}/, '')
+      pieces = Pathname(relevant_path).each_filename.to_a
+
+      unless pieces.length >= 2
+        error_message = %Q(
+          Fixtures are not structured correctly.
+          Please place .json files inside #{settings.fixture_path} as /[url]/[HTTP method]/[response type].json, e.g. /users/GET/success.json
+        )
+        logger.error error_message
+        halt error_message
+      end
+
+      url = pieces[0...-2].join('/')
+      method = pieces[-2]
+      response_name = File.basename(pieces[-1], ".*")
+      contents = File.read(f)
+      JsonRigs::Fixtures::fixture_action url, method do
+        fixture response_name.to_sym do
+          respond_with(contents)
+        end
       end
     end
 
@@ -141,7 +166,7 @@ module JsonRigs
         JsonRigs::Fixtures::load_active_fixtures
 
         # Start listener on fixture path to reload fixtures if necessary.
-        listener = Listen.to(fixture_path, only: /\.rb$/) { |modified, added, removed|
+        listener = Listen.to(fixture_path, only: /\.json$/) { |modified, added, removed|
           on_fixture_change(modified, added, removed)
         }
         listener.start
