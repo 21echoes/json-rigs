@@ -87,17 +87,17 @@ module JsonRigs
       haml :test_panel, locals: {fixtures: @fixtures}
     end
 
-    get '/fixtures' do
+    get '/test-fixtures' do
       fixture_action = params[:fixture_action]
       case fixture_action
-      when 'get'
+      when 'get', nil
         get_fixtures
       else
         halt "unknown fixture action #{fixture_action.inspect}"
       end
     end
 
-    post '/fixtures' do
+    post '/test-fixtures' do
       fixture_action = params[:fixture_action]
       case fixture_action
       when 'clear'
