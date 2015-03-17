@@ -3,8 +3,8 @@ $:.push File.expand_path('../lib', __FILE__)
 # Describe your gem and declare its dependencies:
 Gem::Specification.new do |s|
   s.name        = 'json-rigs'
-  s.version     = '1.0.0'
-  s.date        = '2013-09-01'
+  s.version     = '2.0.0'
+  s.date        = '2015-03-16'
   s.authors     = ['Clinkle','David Kettler']
   s.email       = ['alex@clinkle.com','21echoes@gmail.com']
   s.homepage    = 'https://github.com/21echoes/json-rigs'
@@ -20,8 +20,10 @@ Gem::Specification.new do |s|
   )
   s.license     = 'MIT'
 
-  s.description = 'An easy way to serve fixtures in response to web requests.' + 
-    'Use a handy panel to choose which fixtures to serve. Great for QA and fast prototyping.'
+  s.description = 'Serve fixtured API responses quickly and easily. ' +
+    'Runs a tiny sinatra server that serves .json files from disk. ' +
+    'Control which fixtures are being used at localhost:port/test-panel. ' +
+    'Great for QA and fast prototyping.'
 
   s.add_dependency 'daemons', '~> 1.2'
   s.add_dependency 'json', '~> 1.8'
