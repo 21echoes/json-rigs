@@ -116,6 +116,14 @@ module JsonRigs
     post '/*' do |servlet_url|
       serve_request(servlet_url, :POST)
     end
+
+    put '/*' do |servlet_url|
+      serve_request(servlet_url, :PUT)
+    end
+
+    delete '/*' do |servlet_url|
+      serve_request(servlet_url, :DELETE)
+    end
   end
 
   module FixtureServerRunner
