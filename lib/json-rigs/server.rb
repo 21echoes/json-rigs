@@ -20,8 +20,7 @@ module JsonRigs
       end
     end
 
-    def self.load_fixture(f)
-      puts "Loading #{f}..."
+    def self.extract_pieces_or_halt(f)
       relevant_path = f.sub(/\A#{settings.fixture_path}/, '')
       pieces = Pathname(relevant_path).each_filename.to_a
 
@@ -37,12 +36,26 @@ module JsonRigs
       url = pieces[0...-2].join('/')
       method = pieces[-2]
       response_name = File.basename(pieces[-1], ".*")
+
+      [url, method, response_name]
+    end
+
+    def self.load_fixture(f)
+      puts "Loading #{f}..."
+      url, method, response_name = extract_pieces_or_halt(f)
       contents = File.read(f)
       JsonRigs::Fixtures::fixture_action url, method do
         fixture response_name.to_sym do
           respond_with(contents)
         end
       end
+    end
+
+    def self.remove_fixture(f)
+      puts "Removing #{f}..."
+      url, method, response_name = extract_pieces_or_halt(f)
+
+      JsonRigs::Fixtures::remove_action url, method, response_name
     end
 
     helpers do
@@ -67,7 +80,7 @@ module JsonRigs
           return fixture.response
         else
           logger.info 'No fixture specified, using stub response.'
-          return '{ "success": false, "error_code": 0 }'
+          return 500, "{ \"success\": false, \"error\": \"No fixture specified. Please visit the test panel and chose a fixture for #{method} /#{servlet_url}\" }"
         end
       end
 
@@ -179,8 +192,12 @@ module JsonRigs
       def on_fixture_change(modified, added, removed)
         puts 'Reloading fixtures...'
 
-        JsonRigs::Fixtures::clear_all!
-        FixtureServer::load_fixtures
+        removed.map do |f|
+          FixtureServer::remove_fixture(f)
+        end
+        (modified + added).map do |f|
+          FixtureServer::load_fixture(f)
+        end
         JsonRigs::Fixtures::load_active_fixtures
 
         puts 'Fixtures reloaded.'

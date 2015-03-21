@@ -53,6 +53,13 @@ module JsonRigs
       end
     end
 
+    def self.remove_action(url, method, response_name)
+      action = find_action(url, method)
+      if action
+        action.remove_fixture(response_name.to_s)
+      end
+    end
+
     def self.clear_all!
       @actions = {}
     end

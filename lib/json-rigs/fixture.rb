@@ -33,6 +33,22 @@ module JsonRigs
     def active_fixture; @fixtures[@active_fixture_name] end
     def active_fixture?; !@active_fixture_name.empty? end
 
+    def active_fixture_name=(fixture_name)
+      return unless has_fixture?(fixture_name) or fixture_name.empty?
+      @active_fixture_name = fixture_name
+    end
+
+    def has_fixture? fixture_name
+      @fixtures[fixture_name.to_s]
+    end
+
+    def remove_fixture fixture_name
+      if @active_fixture_name == fixture_name
+        @active_fixture_name = ''
+      end
+      @fixtures.delete(fixture_name)
+    end
+
     def to_hash
       fixture_hash = @fixtures.keys.each_with_object({}) do |fixture_name, hash|
         hash[fixture_name] = @active_fixture_name == fixture_name
