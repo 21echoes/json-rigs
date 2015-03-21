@@ -1,5 +1,3 @@
-require 'json-rigs/fixture-templates'
-
 module JsonRigs
   class Fixture
 
@@ -15,8 +13,6 @@ module JsonRigs
   end
 
   class FixturedAction
-    include JsonRigs::FixtureTemplates
-
     attr_reader :fixtures, :url 
     attr_accessor :active_fixture_name
 
