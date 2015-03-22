@@ -1,7 +1,7 @@
 Purpose:
 ===
 Serve fixtured API responses quickly and easily.
-Runs a tiny sinatra server that serves .json files from disk.
+Runs a tiny sinatra server that serves static `.json` files or dynamic `.rb` files from disk.
 Control which fixtures are being used at localhost:port/test-panel
 Great for QA and fast prototyping.
 
@@ -27,7 +27,20 @@ Usage:
 ===
 1. Make a folder called "fixtures" wherever you'd like to keep your fixtures.
 
-2. Place .json files inside folders inside the fixtures folder as follows: `./fixtures/[url]/[HTTP method]/[response type].json` (e.g. `./fixtures/users/GET/success.json`)
+2.
+  * Place `.json` files inside folders inside the fixtures folder as follows: `./fixtures/[url]/[HTTP method]/[response type].json` (e.g. `./fixtures/users/GET/success.json`)
+
+  * Place `.rb` files in the same manner. `.rb` files should be of the form:
+  ```
+  lambda {|params|
+    if params['data']
+      hash = {success: true, dynamic: "param 'data' was #{params['data']}"}
+    else
+      hash = {success: false, error: "param 'data' was missing!"}
+    end
+    JSON.generate(hash)
+  }
+  ```
 
 3. `jrigs start` from the folder one level above "fixtures" (e.g., if fixtures is at `~/Code/my-api/fixtures`, run `jrigs start` from `~/Code/my-api`)
 
