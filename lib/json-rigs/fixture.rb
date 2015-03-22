@@ -12,6 +12,14 @@ module JsonRigs
     alias_method :delay, :pause_time=
   end
 
+  class DynamicFixture < Fixture
+    attr_accessor :dynamic_response
+
+    def respond_to params
+      @dynamic_response.call(params)
+    end
+  end
+
   class FixturedAction
     attr_reader :fixtures, :url 
     attr_accessor :active_fixture_name
@@ -27,7 +35,12 @@ module JsonRigs
       fixture = Fixture.new
       @fixtures[fixture_name.to_s] = fixture
       fixture.instance_eval &block
-      @active_fixture_name = ''
+    end
+
+    def dynamic_fixture fixture_name, proc
+      fixture = DynamicFixture.new
+      @fixtures[fixture_name.to_s] = fixture
+      fixture.dynamic_response = proc
     end
 
     def active_fixture; @fixtures[@active_fixture_name] end

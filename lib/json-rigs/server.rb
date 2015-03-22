@@ -16,8 +16,15 @@ module JsonRigs
     def self.load_fixtures
       puts "Loading fixtures from #{settings.fixture_path}..."
       Dir[File.join(settings.fixture_path, '**/*.json')].each do |f|
-        load_fixture(f)
+        load_static_fixture(f)
       end
+      Dir[File.join(settings.fixture_path, '**/*.rb')].each do |f|
+        load_dynamic_fixture(f)
+      end
+    end
+
+    def self.load_fixture(f)
+      File.extname(f) == '.rb' ? load_dynamic_fixture(f) : load_static_fixture(f)
     end
 
     def self.extract_pieces_or_halt(f)
@@ -40,7 +47,7 @@ module JsonRigs
       [url, method, response_name]
     end
 
-    def self.load_fixture(f)
+    def self.load_static_fixture(f)
       puts "Loading #{f}..."
       url, method, response_name = extract_pieces_or_halt(f)
       contents = File.read(f)
@@ -48,6 +55,15 @@ module JsonRigs
         fixture response_name.to_sym do
           respond_with(contents)
         end
+      end
+    end
+
+    def self.load_dynamic_fixture(f)
+      puts "Loading #{f}..."
+      url, method, response_name = extract_pieces_or_halt(f)
+      contents = File.read(f)
+      JsonRigs::Fixtures::fixture_action url, method do
+        dynamic_fixture response_name.to_sym, eval(contents)
       end
     end
 
@@ -59,7 +75,7 @@ module JsonRigs
     end
 
     helpers do
-      def serve_request(servlet_url, method)
+      def serve_request(servlet_url, params, method)
         action = JsonRigs::Fixtures::find_action(servlet_url, method)
         halt "unknown action '#{servlet_url} #{method}'" unless action
 
@@ -76,8 +92,14 @@ module JsonRigs
             sleep(fixture.pause_time)
           end
 
+          if fixture.class == JsonRigs::DynamicFixture
+            response = fixture.respond_to params
+          else
+            response = fixture.response
+          end
+
           content_type 'application/json'
-          return fixture.response
+          response
         else
           logger.info 'No fixture specified, using stub response.'
           return 500, "{ \"success\": false, \"error\": \"No fixture specified. Please visit the test panel and chose a fixture for #{method} /#{servlet_url}\" }"
@@ -148,19 +170,19 @@ module JsonRigs
     end
 
     get '/*' do |servlet_url|
-      serve_request(servlet_url, :GET)
+      serve_request(servlet_url, request.params, :GET)
     end
 
     post '/*' do |servlet_url|
-      serve_request(servlet_url, :POST)
+      serve_request(servlet_url, request.params, :POST)
     end
 
     put '/*' do |servlet_url|
-      serve_request(servlet_url, :PUT)
+      serve_request(servlet_url, request.params, :PUT)
     end
 
     delete '/*' do |servlet_url|
-      serve_request(servlet_url, :DELETE)
+      serve_request(servlet_url, request.params, :DELETE)
     end
   end
 
@@ -179,7 +201,7 @@ module JsonRigs
         JsonRigs::Fixtures::load_active_fixtures
 
         # Start listener on fixture path to reload fixtures if necessary.
-        listener = Listen.to(fixture_path, only: /\.json$/) { |modified, added, removed|
+        listener = Listen.to(fixture_path, only: /\.(json|rb)$/) { |modified, added, removed|
           on_fixture_change(modified, added, removed)
         }
         listener.start
